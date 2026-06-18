@@ -2,29 +2,17 @@ package com.anastas1s12.jjs.capability;
 
 import net.minecraft.nbt.CompoundTag;
 
-/**
- * Default implementation of ICursedEnergy.
- * Stores all CE-related player data and handles regeneration logic.
- */
 public class CursedEnergy implements ICursedEnergy {
 
-    // Default Balance Values
     public static final float DEFAULT_BASE_MAX_CE = 1000.0f;
     public static final float DEFAULT_BASE_REGEN = 0.10f; // 1 CE per second at 20 tps
     public static final float DEFAULT_BASE_EFFICIENCY = 0.0f;
     public static final float DEFAULT_BASE_OUTPUT = 1.0f;
 
-    // Mastery thresholds
     public static final int MASTERY_RCT_UNLOCK = 50;
     public static final int MASTERY_SPECIAL_GRADE = 100;
     public static final int MASTERY_XP_PER_LEVEL = 100; // XP needed per mastery level
 
-    // Sukuna finger stats
-    public static final float FINGER_MAX_CE_BONUS = 20.0f;
-    public static final int FINGER_MASTERY_BONUS = 10;
-    public static final int FINGERS_FOR_SPECIAL = 15;
-
-    // Fields
     private float currentCE = DEFAULT_BASE_MAX_CE;
     private float baseMaxCE = DEFAULT_BASE_MAX_CE;
     private float maxCE = DEFAULT_BASE_MAX_CE;
@@ -78,12 +66,6 @@ public class CursedEnergy implements ICursedEnergy {
 
     @Override
     public void recalculateMaxCE() {
-        // Max CE = base + (fingers * bonus) + (mastery level * 5)
-        float fingerBonus = this.fingersConsumed * FINGER_MAX_CE_BONUS;
-        float masteryBonus = this.masteryLevel * 5.0f;
-        this.maxCE = this.baseMaxCE + fingerBonus + masteryBonus;
-
-        // Ensure current doesn't exceed new max
         if (this.currentCE > this.maxCE) {
             this.currentCE = this.maxCE;
         }

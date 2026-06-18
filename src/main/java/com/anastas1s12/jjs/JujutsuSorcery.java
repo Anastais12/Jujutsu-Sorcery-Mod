@@ -1,11 +1,11 @@
 package com.anastas1s12.jjs;
 
-import com.anastas1s12.jjs.ability.AbilityRegistry;
-import com.anastas1s12.jjs.ability.TechniqueRegistry;
+import com.anastas1s12.jjs.system.ability.AbilityRegistry;
 import com.anastas1s12.jjs.capability.CursedEnergyCapability;
 import com.anastas1s12.jjs.event.CursedEnergyEventHandler;
 import com.anastas1s12.jjs.event.ServerEventHandler;
 import com.anastas1s12.jjs.networking.ModNetworking;
+import com.anastas1s12.jjs.system.technique.TechniqueRegistry;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;

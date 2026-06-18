@@ -1,4 +1,4 @@
-package com.anastas1s12.jjs.ability;
+package com.anastas1s12.jjs.system.technique;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -6,6 +6,8 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.anastas1s12.jjs.system.ability.AbilityRegistry;
 
 /**
  * Represents an Innate Technique — a cursed technique a sorcerer is born with.

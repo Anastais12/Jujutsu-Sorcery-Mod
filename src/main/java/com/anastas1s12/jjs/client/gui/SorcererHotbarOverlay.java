@@ -1,7 +1,7 @@
 package com.anastas1s12.jjs.client.gui;
 
 import com.anastas1s12.jjs.JujutsuSorcery;
-import com.anastas1s12.jjs.ability.Ability;
+import com.anastas1s12.jjs.system.ability.Ability;
 import com.anastas1s12.jjs.client.ClientAbilityData;
 import com.anastas1s12.jjs.client.ClientSorcererState;
 import com.mojang.blaze3d.systems.RenderSystem;

@@ -1,12 +1,13 @@
 package com.anastas1s12.jjs.client.screen.menu;
 
-import com.anastas1s12.jjs.ability.Ability;
-import com.anastas1s12.jjs.ability.AbilityType;
+import com.anastas1s12.jjs.system.ability.Ability;
+import com.anastas1s12.jjs.system.ability.AbilityType;
 import com.anastas1s12.jjs.client.ClientAbilityData;
 import com.anastas1s12.jjs.client.ClientCEData;
 import com.anastas1s12.jjs.client.ClientTechniqueData;
 import com.anastas1s12.jjs.networking.ModNetworking;
 import com.anastas1s12.jjs.networking.c2s.AssignAbilityToHotbarC2SPacket;
+import com.anastas1s12.jjs.system.technique.Technique;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
@@ -15,33 +16,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The "Abilities" tab of the JJS sorcerer menu (tab index 0).
- *
- * ── Layout ────────────────────────────────────────────────────────────────────
- *   LEFT SIDEBAR   │            CENTER — 4 rows, one per AbilityType           │  RIGHT SIDEBAR
- *   Selected icon  │  ┌── BASIC ────────────────────────────────────────────┐  │  Stats + desc
- *   + name         │  │ [card] [card] [card] ...                            │  │
- *                  │  ├── ADVANCED ─────────────────────────────────────────┤  │
- *                  │  ├── SPECIAL MOVE ──────────────────────────────────────┤  │
- *                  │  └── DOMAIN ─────────────────────────────────────────────┘  │
- *                       [hotbar slot 1] ... [hotbar slot 9]
- *
- * All ability cards for the player's current technique are shown inside their
- * respective row — no cycling.  Click a card to select it.  Click a hotbar
- * slot to assign the selected ability there.  Right-click a hotbar slot to
- * clear it.
- *
- * =============================================================================
- * TEXTURE-SPACE ROW COORDINATES  (abilities_screen.png, 512×256)
- * =============================================================================
- *   TX_ROW_X   =  94   ← left edge of all rows on the texture
- *   TY_ROW_0   =  52   ← top edge of row 0 (BASIC) on the texture
- *   TX_ROW_W   = 324   ← width of each row on the texture
- *   TY_ROW_H   =  36   ← height of each row on the texture
- *   TY_ROW_GAP =   6   ← vertical gap between rows on the texture
- * =============================================================================
- */
 public class AbilitiesTabScreen extends AbstractMenuScreen {
 
     private static final int TAB_INDEX = 0;
@@ -202,7 +176,7 @@ public class AbilitiesTabScreen extends AbstractMenuScreen {
             graphics.drawString(font, msg,
                     centerX + (centerW - font.width(msg)) / 2, hy, COLOR_NO_TECHNIQUE, false);
         } else {
-            com.anastas1s12.jjs.ability.Technique t = ClientTechniqueData.getTechnique();
+            Technique t = ClientTechniqueData.getTechnique();
             String name = t != null ? t.getName() : "Unknown";
             String header = "Technique: " + name;
             Integer rawColor = (t != null && t.getColor().getColor() != null)

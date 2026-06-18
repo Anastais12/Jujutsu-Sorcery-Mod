@@ -143,13 +143,6 @@ public class CECommand {
                         )
                 )
 
-                // /ce finger [player]
-                .then(Commands.literal("finger")
-                        .executes(ctx -> addFinger(ctx, Collections.singleton(ctx.getSource().getPlayerOrException())))
-                        .then(Commands.argument("player", EntityArgument.players())
-                                .executes(ctx -> addFinger(ctx, EntityArgument.getPlayers(ctx, "player")))
-                        )
-                )
         );
     }
 
@@ -315,20 +308,6 @@ public class CECommand {
                 ce.setCurrentCE(ce.getMaxCE());
                 ctx.getSource().sendSuccess(() -> Component.literal(
                         String.format("Filled %s's CE to %.1f", player.getName().getString(), ce.getMaxCE())
-                ), true);
-            });
-        }
-        return 1;
-    }
-
-    private static int addFinger(CommandContext<CommandSourceStack> ctx, Collection<? extends Player> players) {
-        for (Player player : players) {
-            player.getCapability(CursedEnergyCapability.CURSED_ENERGY_CAPABILITY).ifPresent(ce -> {
-                ce.addFinger();
-                ce.addMasteryPoints(CursedEnergy.FINGER_MASTERY_BONUS);
-                ctx.getSource().sendSuccess(() -> Component.literal(
-                        String.format("Gave %s a Sukuna Finger! (total: %d, Max CE: +%.0f)",
-                                player.getName().getString(), ce.getFingersConsumed(), CursedEnergy.FINGER_MAX_CE_BONUS)
                 ), true);
             });
         }

@@ -1,8 +1,8 @@
 package com.anastas1s12.jjs.command;
 
-import com.anastas1s12.jjs.ability.PlayerTechniqueData;
-import com.anastas1s12.jjs.ability.Technique;
-import com.anastas1s12.jjs.ability.TechniqueRegistry;
+import com.anastas1s12.jjs.system.technique.PlayerTechniqueData;
+import com.anastas1s12.jjs.system.technique.Technique;
+import com.anastas1s12.jjs.system.technique.TechniqueRegistry;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;

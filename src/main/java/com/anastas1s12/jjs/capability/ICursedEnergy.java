@@ -10,10 +10,6 @@ import net.minecraftforge.common.util.INBTSerializable;
  */
 public interface ICursedEnergy extends INBTSerializable<CompoundTag> {
 
-    // ============================================================
-    // Core CE Stats
-    // ============================================================
-
     /** Current CE amount (float for precision). */
     float getCurrentCE();
 

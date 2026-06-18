@@ -1,9 +1,11 @@
-package com.anastas1s12.jjs.ability;
+package com.anastas1s12.jjs.system.ability;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import com.anastas1s12.jjs.system.technique.TechniqueRegistry;
 
 /**
  * Central registry of every ability in the mod.

@@ -1,9 +1,9 @@
 package com.anastas1s12.jjs.client;
 
-import com.anastas1s12.jjs.ability.Ability;
-import com.anastas1s12.jjs.ability.AbilityRegistry;
-import com.anastas1s12.jjs.ability.Technique;
-import com.anastas1s12.jjs.ability.TechniqueRegistry;
+import com.anastas1s12.jjs.system.ability.Ability;
+import com.anastas1s12.jjs.system.ability.AbilityRegistry;
+import com.anastas1s12.jjs.system.technique.Technique;
+import com.anastas1s12.jjs.system.technique.TechniqueRegistry;
 
 import java.util.ArrayList;
 import java.util.Collections;

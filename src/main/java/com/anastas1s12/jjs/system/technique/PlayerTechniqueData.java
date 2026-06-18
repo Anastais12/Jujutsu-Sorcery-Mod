@@ -1,4 +1,4 @@
-package com.anastas1s12.jjs.ability;
+package com.anastas1s12.jjs.system.technique;
 
 import com.anastas1s12.jjs.networking.ModNetworking;
 import com.anastas1s12.jjs.networking.s2c.SyncAbilityHotbarS2CPacket;

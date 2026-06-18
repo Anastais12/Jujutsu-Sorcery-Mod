@@ -1,6 +1,6 @@
 package com.anastas1s12.jjs.client.screen.menu;
 
-import com.anastas1s12.jjs.ability.Grade;
+import com.anastas1s12.jjs.system.ability.Grade;
 import com.anastas1s12.jjs.client.ClientCEData;
 import com.anastas1s12.jjs.client.ClientTechniqueData;
 import com.anastas1s12.jjs.capability.CursedEnergy;

@@ -1,19 +1,10 @@
 package com.anastas1s12.jjs.client;
 
-import com.anastas1s12.jjs.ability.Ability;
-import com.anastas1s12.jjs.ability.AbilityRegistry;
+import com.anastas1s12.jjs.system.ability.Ability;
+import com.anastas1s12.jjs.system.ability.AbilityRegistry;
 
 import java.util.Arrays;
 
-/**
- * Client-side cache of the player's ability hotbar assignments.
- *
- * The hotbar has 9 slots. Each slot holds either:
- *   - A non-null ability ID string (matched against AbilityRegistry), or
- *   - An empty string / null meaning the slot is empty.
- *
- * Updated by SyncAbilityHotbarS2CPacket whenever the server syncs assignments.
- */
 public final class ClientAbilityData {
 
     private ClientAbilityData() {}
@@ -27,8 +18,6 @@ public final class ClientAbilityData {
         Arrays.fill(slotIds, "");
     }
 
-    // ---- Update from server ------------------------------------------------
-
     /**
      * Called by SyncAbilityHotbarS2CPacket to update the full hotbar.
      *
@@ -39,8 +28,6 @@ public final class ClientAbilityData {
             slotIds[i] = (ids != null && i < ids.length && ids[i] != null) ? ids[i] : "";
         }
     }
-
-    // ---- Getters -----------------------------------------------------------
 
     /**
      * Returns the ability ID in slot {@code slot}, or "" if empty.
@@ -79,8 +66,6 @@ public final class ClientAbilityData {
         if (slot < 0 || slot >= HOTBAR_SLOTS) return;
         String id = (abilityId != null) ? abilityId : "";
 
-        // Mirror the server's duplicate-removal logic: clear any other slot
-        // that already holds this ability ID before assigning it here.
         if (!id.isEmpty()) {
             for (int i = 0; i < HOTBAR_SLOTS; i++) {
                 if (id.equals(slotIds[i])) slotIds[i] = "";

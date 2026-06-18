@@ -1,4 +1,4 @@
-package com.anastas1s12.jjs.ability;
+package com.anastas1s12.jjs.system.ability;
 
 import net.minecraft.resources.ResourceLocation;
 
