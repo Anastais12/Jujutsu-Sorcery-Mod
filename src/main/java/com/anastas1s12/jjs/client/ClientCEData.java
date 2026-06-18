@@ -300,12 +300,12 @@ public class ClientCEData {
 
         @Override
         public void setFingersConsumed(int count) {
-            // No-op
+
         }
 
         @Override
         public void addFinger() {
-            // No-op
+
         }
 
         @Override
@@ -320,7 +320,7 @@ public class ClientCEData {
 
         @Override
         public void copyFrom(ICursedEnergy source) {
-            // No-op on client
+
         }
 
         @Override
@@ -330,7 +330,7 @@ public class ClientCEData {
 
         @Override
         public void deserializeNBT(CompoundTag nbt) {
-            // Not used on client
+
         }
     }
 }

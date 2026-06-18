@@ -1,6 +1,8 @@
-package com.anastas1s12.jjs.networking;
+package com.anastas1s12.jjs.networking.c2s;
 
 import com.anastas1s12.jjs.capability.CursedEnergyCapability;
+import com.anastas1s12.jjs.networking.ModNetworking;
+import com.anastas1s12.jjs.networking.s2c.CursedEnergySyncS2CPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;

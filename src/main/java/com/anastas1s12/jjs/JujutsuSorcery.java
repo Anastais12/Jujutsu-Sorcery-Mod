@@ -1,5 +1,7 @@
 package com.anastas1s12.jjs;
 
+import com.anastas1s12.jjs.ability.AbilityRegistry;
+import com.anastas1s12.jjs.ability.TechniqueRegistry;
 import com.anastas1s12.jjs.capability.CursedEnergyCapability;
 import com.anastas1s12.jjs.event.CursedEnergyEventHandler;
 import com.anastas1s12.jjs.event.ServerEventHandler;
@@ -19,8 +21,8 @@ public class JujutsuSorcery {
     public static final String MOD_ID = "jjs";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public JujutsuSorcery() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public JujutsuSorcery(FMLJavaModLoadingContext context) {
+        IEventBus modEventBus = context.getModEventBus();
         IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
 
         modEventBus.addListener(this::commonSetup);
@@ -37,7 +39,9 @@ public class JujutsuSorcery {
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             ModNetworking.register();
-            LOGGER.info("JJS Networking registered successfully.");
+            AbilityRegistry.init();
+            TechniqueRegistry.init();
+            LOGGER.info("JJS Networking and AbilityRegistry initialized.");
         });
     }
 

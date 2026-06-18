@@ -1,9 +1,13 @@
 package com.anastas1s12.jjs.client.input;
 
 import com.anastas1s12.jjs.JujutsuSorcery;
-import com.anastas1s12.jjs.capability.CursedEnergyCapability;
+import com.anastas1s12.jjs.client.ClientAbilityData;
+import com.anastas1s12.jjs.client.ClientSorcererState;
 import com.anastas1s12.jjs.client.screen.menu.AbilitiesTabScreen;
+import com.anastas1s12.jjs.networking.ModNetworking;
+import com.anastas1s12.jjs.networking.c2s.ToggleSorcererModeC2SPacket;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -11,104 +15,131 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * Handles all game-loop input events (Key and Mouse clicks).
- * These must listen to Bus.FORGE (the default).
+ * Handles all client-side input events.
+ *
+ * Key bindings (Bus.FORGE):
+ *   J  → open sorcerer menu
+ *   R  → toggle sorcerer mode  (was: toggle RCT)
+ *   Middle mouse → use selected ability
+ *
+ * Mouse scroll (Bus.FORGE):
+ *   While sorcerer mode is active the scroll wheel cycles the ability
+ *   hotbar slot instead of the vanilla item hotbar.
  */
 @Mod.EventBusSubscriber(modid = JujutsuSorcery.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientInputHandler {
 
-    /**
-     * Handle key input events (key pressed/released).
-     * This fires every time a key is pressed while in-game.
-     */
+    // ── Key input ─────────────────────────────────────────────────────────────
+
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return; // Must be in-game
-        if (mc.screen != null) return; // Don't trigger while in a GUI
+        if (mc.player == null) return;
+        if (mc.screen != null) return; // don't fire while a GUI is open
 
-        // ---- OPEN MENU (J key) ----
+        // ---- OPEN MENU (J) -----------------------------------------------
         if (Keybinds.OPEN_MENU.consumeClick()) {
-            openMenu();
+            mc.setScreen(new AbilitiesTabScreen());
             return;
         }
 
-        // ---- TOGGLE RCT (R key) ----
-        if (Keybinds.TOGGLE_RCT.consumeClick()) {
-            toggleRCT();
+        // ---- TOGGLE SORCERER MODE (R) ------------------------------------
+        if (Keybinds.TOGGLE_SORCERER_MODE.consumeClick()) {
+            toggleSorcererMode();
             return;
         }
     }
 
-    /**
-     * Handle mouse input events (mouse buttons).
-     * This fires every time a mouse button is clicked.
-     */
+    // ── Mouse button input ────────────────────────────────────────────────────
+
     @SubscribeEvent
     public static void onMouseInput(InputEvent.MouseButton event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         if (mc.screen != null) return;
 
-        // ---- USE ABILITY (Middle mouse) ----
+        // ---- USE ABILITY (middle mouse) ----------------------------------
         if (Keybinds.USE_ABILITY.consumeClick()) {
-            useHotbarAbility();
+            useSelectedAbility();
         }
     }
 
-    // ============================================================
-    // ACTIONS
-    // ============================================================
+    // ── Mouse scroll ─────────────────────────────────────────────────────────
 
-    private static void openMenu() {
-        Minecraft mc = Minecraft.getInstance();
-        mc.setScreen(new AbilitiesTabScreen());
-    }
-
-    private static void toggleRCT() {
+    /**
+     * While sorcerer mode is active, hijack the scroll wheel to cycle the
+     * ability hotbar slot and cancel the vanilla hotbar scroll.
+     */
+    @SubscribeEvent
+    public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
+        if (mc.screen != null) return;
+        if (!ClientSorcererState.isSorcererModeActive()) return;
 
-        mc.player.getCapability(CursedEnergyCapability.CURSED_ENERGY_CAPABILITY).ifPresent(ce -> {
-            if (ce.getMasteryLevel() < 50 && !ce.isRCTActive()) {
-                mc.player.displayClientMessage(
-                        net.minecraft.network.chat.Component.literal("\u00A7cRCT requires Mastery Level 50"),
-                        true);
-                return;
-            }
+        // delta > 0 → scroll up → move selection left (-1)
+        // delta < 0 → scroll down → move selection right (+1)
+        int delta = event.getScrollDelta() > 0 ? -1 : 1;
+        ClientSorcererState.scrollSlot(delta);
 
-            ce.setRCTActive(!ce.isRCTActive());
-
-            String msg = ce.isRCTActive() ?
-                    "\u00A7dReverse Cursed Technique: ON" :
-                    "\u00A77Reverse Cursed Technique: OFF";
-            mc.player.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal(msg), true);
-        });
+        // Cancel the event so vanilla hotbar scroll is suppressed
+        event.setCanceled(true);
     }
 
-    private static void useHotbarAbility() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
+    // ── Actions ───────────────────────────────────────────────────────────────
 
-        mc.player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal("\u00A77Ability used!"),
-                true);
+    /**
+     * Sends a ToggleSorcererModeC2SPacket to the server.
+     * The server flips the flag and echoes back a SorcererModeSyncS2CPacket
+     * which updates {@link ClientSorcererState} on the client.
+     */
+    private static void toggleSorcererMode() {
+        ModNetworking.INSTANCE.sendToServer(new ToggleSorcererModeC2SPacket());
+
+        // Optimistic local feedback message (server will confirm shortly)
+        boolean willBeActive = !ClientSorcererState.isSorcererModeActive();
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            String msg = willBeActive
+                    ? "\u00A7aSorcerer Mode: ON"
+                    : "\u00A77Sorcerer Mode: OFF";
+            mc.player.displayClientMessage(Component.literal(msg), true);
+        }
     }
 
     /**
-     * Nested class to safely capture Mod-specific startup events (Bus.MOD).
-     * This satisfies Forge's rule requiring registration events to sit on the Mod Bus.
+     * Uses the ability currently in the selected hotbar slot.
+     * TODO: send a UseAbilityC2SPacket when the ability execution system exists.
      */
+    private static void useSelectedAbility() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        if (!ClientSorcererState.isSorcererModeActive()) return;
+
+        int slot = ClientSorcererState.getSelectedSlot();
+        var ability = ClientAbilityData.getSlotAbility(slot);
+
+        if (ability == null) {
+            mc.player.displayClientMessage(
+                    Component.literal("\u00A77No ability in slot " + (slot + 1)), true);
+            return;
+        }
+
+        // TODO: send UseAbilityC2SPacket(ability.getId()) to the server
+        mc.player.displayClientMessage(
+                Component.literal("\u00A7b[" + ability.getName() + "] used!"), true);
+    }
+
+    // ── Mod bus subscriber (keybind registration) ─────────────────────────────
+
     @Mod.EventBusSubscriber(modid = JujutsuSorcery.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ModBusSubscriber {
         @SubscribeEvent
         public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
             event.register(Keybinds.OPEN_MENU);
-            event.register(Keybinds.TOGGLE_RCT);
+            event.register(Keybinds.TOGGLE_SORCERER_MODE);
             event.register(Keybinds.USE_ABILITY);
-
-            JujutsuSorcery.LOGGER.info("JJS keybinds registered via Client Mod Bus.");
+            JujutsuSorcery.LOGGER.info("JJS keybinds registered.");
         }
     }
 }

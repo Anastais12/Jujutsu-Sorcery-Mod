@@ -18,7 +18,7 @@ public enum Grade {
     private final String title;
     private final ChatFormatting chatColor;
     private final int color;
-    private final int minMastery; // Minimum mastery level to achieve this grade
+    private final int minMastery;
 
     Grade(String title, ChatFormatting chatColor, int color, int minMastery) {
         this.title = title;

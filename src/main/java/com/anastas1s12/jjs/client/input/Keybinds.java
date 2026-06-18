@@ -48,11 +48,11 @@ public class Keybinds {
     );
 
     /**
-     * Toggles Reverse Cursed Technique.
+     * Toggles Sorcerer Mode (shows/hides the ability hotbar).
      * Default: R key
      */
-    public static final KeyMapping TOGGLE_RCT = new KeyMapping(
-            "key." + JujutsuSorcery.MOD_ID + ".toggle_rct",
+    public static final KeyMapping TOGGLE_SORCERER_MODE = new KeyMapping(
+            "key." + JujutsuSorcery.MOD_ID + ".toggle_sorcerer_mode",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_R,

@@ -1,6 +1,5 @@
-package com.anastas1s12.jjs.networking;
+package com.anastas1s12.jjs.networking.s2c;
 
-import com.anastas1s12.jjs.capability.CursedEnergyCapability;
 import com.anastas1s12.jjs.capability.ICursedEnergy;
 import com.anastas1s12.jjs.client.ClientCEData;
 import net.minecraft.network.FriendlyByteBuf;

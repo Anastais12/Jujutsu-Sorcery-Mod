@@ -3,9 +3,8 @@ package com.anastas1s12.jjs.event;
 import com.anastas1s12.jjs.JujutsuSorcery;
 import com.anastas1s12.jjs.capability.CursedEnergyCapability;
 import com.anastas1s12.jjs.capability.ICursedEnergy;
-import com.anastas1s12.jjs.networking.CursedEnergySyncS2CPacket;
+import com.anastas1s12.jjs.networking.s2c.CursedEnergySyncS2CPacket;
 import com.anastas1s12.jjs.networking.ModNetworking;
-import com.anastas1s12.jjs.networking.RequestCEDataC2SPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -15,6 +14,7 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import com.anastas1s12.jjs.networking.s2c.SyncAbilityHotbarS2CPacket;
 import net.minecraftforge.network.PacketDistributor;
 
 /**
@@ -79,6 +79,14 @@ public class CursedEnergyEventHandler {
             player.getCapability(CursedEnergyCapability.CURSED_ENERGY_CAPABILITY).ifPresent(ce -> {
                 syncToClient(player, ce);
             });
+            // Sync ability hotbar assignments to the newly connected client.
+            // TODO: load per-player hotbar data from capability / saved data.
+            //       For now sends an empty hotbar so the client initialises cleanly.
+            String[] slots = loadAbilityHotbar(player);
+            ModNetworking.INSTANCE.send(
+                    PacketDistributor.PLAYER.with(() -> player),
+                    new SyncAbilityHotbarS2CPacket(slots)
+            );
         }
     }
 
@@ -132,5 +140,21 @@ public class CursedEnergyEventHandler {
                 PacketDistributor.PLAYER.with(() -> player),
                 new CursedEnergySyncS2CPacket(ce)
         );
+    }
+
+    /**
+     * Loads the player's saved ability hotbar from persistent data.
+     * Slots are stored as "jjs_hotbar_0" … "jjs_hotbar_8".
+     * Returns an array of 9 strings; empty string = unoccupied slot.
+     *
+     * TODO: replace with a proper capability or SavedData when the ability
+     *       persistence system is implemented.
+     */
+    private static String[] loadAbilityHotbar(ServerPlayer player) {
+        String[] slots = new String[9];
+        for (int i = 0; i < 9; i++) {
+            slots[i] = player.getPersistentData().getString("jjs_hotbar_" + i);
+        }
+        return slots;
     }
 }
