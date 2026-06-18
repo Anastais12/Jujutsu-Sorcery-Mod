@@ -4,16 +4,11 @@ import com.anastas1s12.jjs.JujutsuSorcery;
 import com.anastas1s12.jjs.ability.Ability;
 import com.anastas1s12.jjs.ability.AbilityType;
 import com.anastas1s12.jjs.ability.DamageType;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -24,42 +19,10 @@ import java.util.List;
  * ABILITIES TAB SCREEN — The Main Ability Browser
  * =============================================================================
  *
- * This is the primary tab of the sorcerer menu. It displays:
- *
- *   LEFT CONTENT AREA (55% of right panel):
- *     - 4 collapsible sections: Basic, Advanced, Special, Domain
- *     - Each section shows ability icons (32x32) in a grid
- *     - Click an ability to select it
- *     - Locked abilities show a grayed-out/red overlay
- *
- *   RIGHT DETAIL PANEL (45% of right panel):
- *     - Ability name in large text
- *     - Colored banner showing ability type (Basic/Advanced/Special/Domain)
- *     - CE cost with icon
- *     - Cooldown with icon
- *     - Damage type with colored indicator
- *     - Multi-line description
- *     - Requirements list (green if met, red if not)
- *     - "Press [P] for Preview" hint
- *
- *   BOTTOM HOTBAR:
- *     - 9 slots for assigning abilities
- *     - Drag abilities from the list or click to assign
- *     - Shows ability icon + CE cost
- *
- * TEXTURE PATHS (place your textures at these locations):
- *   - Ability section headers: textures/gui/menu/section_header.png
- *   - Hotbar slot background: textures/gui/menu/hotbar_slot.png
- *   - Locked overlay: textures/gui/menu/locked_overlay.png
- *   - Preview banner: textures/gui/menu/preview_banner.png
- *
+ * Uses the new full-screen per-tab background from BaseMenuScreen.
  * =============================================================================
  */
 public class AbilitiesTabScreen extends BaseMenuScreen {
-
-    // ============================================================
-    // TEXTURES — Add your own textures here
-    // ============================================================
 
     /** Hotbar slot background texture */
     public static final ResourceLocation HOTBAR_SLOT_TEXTURE =
@@ -68,10 +31,6 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
     /** Locked ability overlay (red X or dim) */
     public static final ResourceLocation LOCKED_OVERLAY =
             ResourceLocation.fromNamespaceAndPath(JujutsuSorcery.MOD_ID, "textures/gui/menu/locked_overlay.png");
-
-    // ============================================================
-    // LAYOUT CONSTANTS
-    // ============================================================
 
     /** Width of the ability list area (left side of content) */
     private static final int LIST_WIDTH = 195;
@@ -121,8 +80,6 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
 
         // ============================================================
         // EXAMPLE ABILITIES — Replace this with your actual data!
-        // These are placeholder abilities showing the structure.
-        // Load from player capability, JSON, or registry instead.
         // ============================================================
 
         allAbilities.add(new Ability.Builder("punch", "Cursed Punch", AbilityType.BASIC)
@@ -131,7 +88,7 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
                 .description("Low cost, spammable. Damage scales with CE Output.")
                 .requirement("None — starting ability")
                 .build());
-        allAbilities.get(0).setUnlocked(true); // Unlocked by default
+        allAbilities.get(0).setUnlocked(true);
 
         allAbilities.add(new Ability.Builder("divergent_fist", "Divergent Fist", AbilityType.BASIC)
                 .ceCost(12f).cooldown(2).damageType(DamageType.BLUNT)
@@ -220,28 +177,21 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
     // ABILITY LIST — 4 Sections
     // ============================================================
 
-    /**
-     * Renders the 4 ability sections (Basic, Advanced, Special, Domain)
-     * as a scrollable list on the left side of the content area.
-     */
     private void renderAbilityList(GuiGraphics graphics, int mouseX, int mouseY) {
         int listX = contentLeft();
         int listY = contentTop();
         int currentY = listY;
 
-        // Render each section
         AbilityType[] types = AbilityType.values();
         for (int i = 0; i < types.length; i++) {
             AbilityType type = types[i];
 
-            // ---- Section Header ----
             boolean expanded = sectionExpanded[i];
             boolean headerHovered = mouseX >= listX && mouseX < listX + LIST_WIDTH
                     && mouseY >= currentY && mouseY < currentY + SECTION_HEADER_HEIGHT;
 
             renderSectionHeader(graphics, listX, currentY, LIST_WIDTH, type, expanded, headerHovered);
 
-            // Click to toggle expand
             if (headerHovered) {
                 tooltipText = expanded ? "Click to collapse" : "Click to expand";
                 tooltipX = mouseX;
@@ -250,7 +200,6 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
 
             currentY += SECTION_HEADER_HEIGHT;
 
-            // ---- Section Content (icons grid) ----
             if (expanded) {
                 List<Ability> sectionAbilities = getAbilitiesByType(type);
                 if (!sectionAbilities.isEmpty()) {
@@ -258,39 +207,29 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
                             LIST_WIDTH, sectionAbilities, mouseX, mouseY);
                     currentY += sectionHeight;
                 } else {
-                    // Empty section message
                     graphics.drawString(this.font, "No abilities unlocked...",
                             listX + 5, currentY + 5, 0xFF666666, false);
                     currentY += 20;
                 }
             }
 
-            // Small gap between sections
             currentY += 3;
         }
     }
 
-    /**
-     * Renders a section header bar with the ability type name and color.
-     */
     private void renderSectionHeader(GuiGraphics graphics, int x, int y, int width,
-                                      AbilityType type, boolean expanded, boolean hovered) {
-        // Background
+                                     AbilityType type, boolean expanded, boolean hovered) {
         int bgColor = hovered ? 0xFF333333 : 0xFF222222;
         graphics.fill(x, y, x + width, y + SECTION_HEADER_HEIGHT, bgColor);
 
-        // Left colored stripe
         graphics.fill(x, y, x + 3, y + SECTION_HEADER_HEIGHT, type.getColor());
 
-        // Expand/collapse arrow
         String arrow = expanded ? "v" : ">";
         graphics.drawString(this.font, arrow, x + 6, y + 4, 0xFFFFFFFF, false);
 
-        // Section name
         String label = type.getDisplayName() + " Abilities";
         graphics.drawString(this.font, label, x + 18, y + 4, type.getColor(), false);
 
-        // Count
         int count = (int) allAbilities.stream().filter(a -> a.getType() == type).count();
         int unlocked = (int) allAbilities.stream()
                 .filter(a -> a.getType() == type && a.isUnlocked()).count();
@@ -299,38 +238,29 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
         graphics.drawString(this.font, countStr, x + width - countWidth - 4, y + 4,
                 0xFFAAAAAA, false);
 
-        // Bottom border
         graphics.hLine(x, x + width, y + SECTION_HEADER_HEIGHT - 1, type.getColor() & 0xFF444444);
     }
 
-    /**
-     * Renders a grid of ability icons for a section.
-     * Returns the height consumed.
-     */
     private int renderAbilityGrid(GuiGraphics graphics, int x, int y, int width,
-                                   List<Ability> abilities, int mouseX, int mouseY) {
+                                  List<Ability> abilities, int mouseX, int mouseY) {
         int startY = y;
         int iconX = x + 4;
         int iconY = y + 4;
         int count = 0;
 
         for (Ability ability : abilities) {
-            // New row if needed
             if (count > 0 && count % ICONS_PER_ROW == 0) {
                 iconX = x + 4;
                 iconY += ICON_SIZE + ICON_GAP;
             }
 
-            // Check if icon is hovered
             boolean hovered = mouseX >= iconX && mouseX < iconX + ICON_SIZE
                     && mouseY >= iconY && mouseY < iconY + ICON_SIZE;
 
             renderAbilityIcon(graphics, ability, iconX, iconY, hovered);
 
-            // Store clickable area
             abilityClickAreas.add(new AbilityClickArea(ability, iconX, iconY, ICON_SIZE, ICON_SIZE));
 
-            // Tooltip on hover
             if (hovered) {
                 tooltipText = ability.getName() + " (" + ability.getCostDisplay() + ")";
                 tooltipX = mouseX;
@@ -341,22 +271,16 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
             count++;
         }
 
-        // Return total height used
         int rows = (int) Math.ceil((double) count / ICONS_PER_ROW);
         return rows * (ICON_SIZE + ICON_GAP) + 8;
     }
 
-    /**
-     * Renders a single ability icon (28x28) with border, icon, and lock overlay.
-     */
     private void renderAbilityIcon(GuiGraphics graphics, Ability ability, int x, int y, boolean hovered) {
         boolean isSelected = selectedAbility == ability;
 
-        // Background
         int bgColor = isSelected ? 0xFF444444 : (hovered ? 0xFF333333 : 0xFF222222);
         graphics.fill(x, y, x + ICON_SIZE, y + ICON_SIZE, bgColor);
 
-        // Border — green if selected, colored by type if unlocked, gray if locked
         int borderColor;
         if (isSelected) {
             borderColor = 0xFFFFFFFF;
@@ -367,34 +291,26 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
         }
         graphics.renderOutline(x, y, ICON_SIZE, ICON_SIZE, borderColor);
 
-        // Icon placeholder — colored square based on damage type
-        // REPLACE THIS: blit your actual ability icon texture here
         int iconInnerX = x + 2;
         int iconInnerY = y + 2;
         int iconInnerSize = ICON_SIZE - 4;
 
         if (ability.isUnlocked()) {
-            // Unlocked: show ability color
             graphics.fill(iconInnerX, iconInnerY,
                     iconInnerX + iconInnerSize, iconInnerY + iconInnerSize,
                     ability.getDamageType().getColor() & 0xFF999999);
 
-            // Type indicator — small dot in corner
             int dotColor = ability.getType().getColor();
             graphics.fill(x + ICON_SIZE - 6, y + 1, x + ICON_SIZE - 1, y + 6, dotColor);
         } else {
-            // Locked: dark gray with red X
             graphics.fill(iconInnerX, iconInnerY,
                     iconInnerX + iconInnerSize, iconInnerY + iconInnerSize,
                     0xFF333333);
-            // Red X
             graphics.drawString(this.font, "X", x + 9, y + 8, 0xFFFF0000, false);
         }
 
-        // Hover glow effect
         if (hovered && ability.isUnlocked()) {
-            graphics.fill(x, y, x + ICON_SIZE, y + ICON_SIZE,
-                    0x20FFFFFF); // Semi-transparent white overlay
+            graphics.fill(x, y, x + ICON_SIZE, y + ICON_SIZE, 0x20FFFFFF);
         }
     }
 
@@ -402,10 +318,6 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
     // ABILITY DETAIL PANEL
     // ============================================================
 
-    /**
-     * Renders the detail panel for the selected ability.
-     * Shows: banner, name, type, cost, cooldown, damage type, description, requirements.
-     */
     private void renderAbilityDetail(GuiGraphics graphics, int mouseX, int mouseY) {
         Ability a = selectedAbility;
         int detailX = contentLeft() + LIST_WIDTH + 8;
@@ -413,57 +325,45 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
         int detailW = DETAIL_WIDTH;
         int maxDetailH = BG_HEIGHT - CONTENT_TOP - HOTBAR_HEIGHT - 15;
 
-        // Background panel
         graphics.fill(detailX, detailY, detailX + detailW, detailY + maxDetailH, 0xCC1A1A1A);
         graphics.renderOutline(detailX, detailY, detailW, maxDetailH, 0xFF555555);
 
-        // ---- Type Banner (top colored bar) ----
         int bannerHeight = 22;
         graphics.fill(detailX + 1, detailY + 1,
                 detailX + detailW - 1, detailY + bannerHeight, a.getType().getBannerColor());
 
-        // Type name on banner
         String typeName = a.getType().getDisplayName().toUpperCase();
         int typeNameWidth = this.font.width(typeName);
         graphics.drawString(this.font, typeName,
                 detailX + (detailW - typeNameWidth) / 2,
                 detailY + 7, 0xFFFFFFFF, true);
 
-        // ---- Ability Name ----
         int textY = detailY + bannerHeight + 6;
         graphics.drawString(this.font,
                 Component.literal(a.getName()).withStyle(ChatFormatting.BOLD),
                 detailX + 5, textY, 0xFFFFFFFF, false);
         textY += 14;
 
-        // Divider
         graphics.hLine(detailX + 5, detailX + detailW - 5, textY, 0xFF444444);
         textY += 6;
 
-        // ---- Stats Grid ----
-        // CE Cost
         renderDetailStat(graphics, detailX + 5, textY, "CE Cost:", a.getCostDisplay(), 0xFF00E676);
         textY += 14;
 
-        // Cooldown
         renderDetailStat(graphics, detailX + 5, textY, "Cooldown:", a.getCooldownDisplay(), 0xFFFFD700);
         textY += 14;
 
-        // Damage Type (with color)
         renderDetailStat(graphics, detailX + 5, textY, "Damage:",
                 a.getDamageType().getDisplayName(), a.getDamageType().getColor());
         textY += 18;
 
-        // Divider
         graphics.hLine(detailX + 5, detailX + detailW - 5, textY, 0xFF444444);
         textY += 6;
 
-        // ---- Description ----
         graphics.drawString(this.font, "Description:", detailX + 5, textY, 0xFFAAAAAA, false);
         textY += 12;
 
         for (String line : a.getDescription()) {
-            // Word-wrap the description to fit the panel width
             List<String> wrapped = wrapText(line, detailW - 10);
             for (String wrappedLine : wrapped) {
                 graphics.drawString(this.font, wrappedLine, detailX + 8, textY, 0xFFCCCCCC, false);
@@ -473,7 +373,6 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
 
         textY += 4;
 
-        // ---- Requirements ----
         if (!a.getRequirements().isEmpty()) {
             graphics.hLine(detailX + 5, detailX + detailW - 5, textY, 0xFF444444);
             textY += 6;
@@ -481,8 +380,8 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
             textY += 12;
 
             for (String req : a.getRequirements()) {
-                boolean met = isRequirementMet(req); // Check if player meets this req
-                int color = met ? 0xFF4CAF50 : 0xFFFF5252; // Green if met, red if not
+                boolean met = isRequirementMet(req);
+                int color = met ? 0xFF4CAF50 : 0xFFFF5252;
                 String prefix = met ? "+ " : "- ";
 
                 List<String> wrapped = wrapText(prefix + req, detailW - 10);
@@ -493,22 +392,17 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
             }
         }
 
-        // ---- Preview hint ----
         textY += 6;
         String previewHint = "Press [P] for Preview";
         int hintWidth = this.font.width(previewHint);
         int hintX = detailX + (detailW - hintWidth) / 2;
 
-        // Pulsing alpha for the hint
         float pulse = (float) (Math.sin(System.currentTimeMillis() / 300.0) * 0.3 + 0.7);
         int hintAlpha = (int) (pulse * 255) << 24;
         graphics.drawString(this.font, previewHint, hintX, textY,
                 hintAlpha | 0xFFAAAA, false);
     }
 
-    /**
-     * Renders the detail panel when no ability is selected.
-     */
     private void renderEmptyDetail(GuiGraphics graphics) {
         int detailX = contentLeft() + LIST_WIDTH + 8;
         int detailY = contentTop();
@@ -530,9 +424,6 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
                 detailX + (detailW - subWidth) / 2, msgY + 12, 0xFF555555, false);
     }
 
-    /**
-     * Renders a single stat row in the detail panel: Label on left, value on right.
-     */
     private void renderDetailStat(GuiGraphics graphics, int x, int y, String label, String value, int valueColor) {
         graphics.drawString(this.font, label, x, y, 0xFF999999, false);
         int valueWidth = this.font.width(value);
@@ -540,19 +431,14 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
     }
 
     // ============================================================
-    // HOTBAR — 9 Slots
+    // HOTBAR
     // ============================================================
 
-    /**
-     * Renders the 9 hotbar slots at the bottom of the screen.
-     * Each slot shows the assigned ability's icon and CE cost.
-     */
     private void renderHotbar(GuiGraphics graphics, int mouseX, int mouseY) {
         int hotbarY = panelTop + BG_HEIGHT - HOTBAR_HEIGHT - 5;
-        int totalWidth = 9 * SLOT_SIZE + 8 * 3; // 9 slots + gaps
+        int totalWidth = 9 * SLOT_SIZE + 8 * 3;
         int hotbarX = panelLeft + (BG_WIDTH - totalWidth) / 2;
 
-        // Label
         graphics.drawString(this.font, "Ability Hotbar",
                 hotbarX, hotbarY - 12, 0xFFAAAAAA, false);
 
@@ -563,34 +449,28 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
 
             Ability ability = hotbarAbilities[i];
 
-            // Slot background
             int bgColor = hovered ? 0xFF3A3A3A : 0xFF222222;
             graphics.fill(slotX, hotbarY, slotX + SLOT_SIZE, hotbarY + SLOT_SIZE, bgColor);
             graphics.renderOutline(slotX, hotbarY, SLOT_SIZE, SLOT_SIZE,
                     hovered ? 0xFFFFFFFF : 0xFF555555);
 
-            // Slot number (1-9)
             graphics.drawString(this.font, String.valueOf(i + 1),
                     slotX + 2, hotbarY + 1, 0xFF666666, false);
 
             if (ability != null) {
-                // Ability icon (smaller, centered)
                 int iconX = slotX + 4;
                 int iconY = hotbarY + 4;
                 int iconS = SLOT_SIZE - 8;
 
-                // Icon placeholder
                 graphics.fill(iconX, iconY, iconX + iconS, iconY + iconS,
                         ability.getDamageType().getColor() & 0xFF777777);
 
-                // CE cost below icon
                 String cost = ability.getCostDisplay();
                 int costWidth = this.font.width(cost);
                 graphics.drawString(this.font, cost,
                         slotX + (SLOT_SIZE - costWidth) / 2,
                         hotbarY + SLOT_SIZE - 9, 0xFF00E676, false);
 
-                // Tooltip
                 if (hovered) {
                     tooltipText = ability.getName() + " — " + ability.getCostDisplay();
                     tooltipX = mouseX;
@@ -598,18 +478,16 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
                 }
             }
 
-            // Store clickable area
             hotbarSlotAreas.add(new HotbarSlotArea(i, slotX, hotbarY, SLOT_SIZE, SLOT_SIZE));
         }
     }
 
     // ============================================================
-    // INPUT HANDLING — Mouse & Keyboard
+    // INPUT HANDLING
     // ============================================================
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Check ability icon clicks (select ability)
         for (AbilityClickArea area : abilityClickAreas) {
             if (area.contains((int) mouseX, (int) mouseY)) {
                 if (area.ability.isUnlocked()) {
@@ -619,12 +497,6 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
             }
         }
 
-        // Check section header clicks (toggle expand)
-        // This is handled by checking the header areas in the render method
-        // and toggling when clicked. For simplicity, we use keyboard or
-        // detect header clicks here too.
-
-        // Check hotbar slot clicks (assign ability)
         if (selectedAbility != null) {
             for (HotbarSlotArea area : hotbarSlotAreas) {
                 if (area.contains((int) mouseX, (int) mouseY)) {
@@ -639,15 +511,13 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // Press P to open video preview for selected ability
         if (keyCode == GLFW.GLFW_KEY_P && selectedAbility != null) {
             openVideoPreview(selectedAbility);
             return true;
         }
 
-        // Number keys 1-9 to assign selected ability to hotbar
         if (selectedAbility != null && keyCode >= GLFW.GLFW_KEY_1 && keyCode <= GLFW.GLFW_KEY_9) {
-            int slot = keyCode - GLFW.GLFW_KEY_1; // 0-8
+            int slot = keyCode - GLFW.GLFW_KEY_1;
             assignToHotbar(selectedAbility, slot);
             return true;
         }
@@ -659,18 +529,12 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
     // ACTIONS
     // ============================================================
 
-    /**
-     * Assigns an ability to a hotbar slot (0-8).
-     * Removes it from any previous slot first.
-     */
     private void assignToHotbar(Ability ability, int slot) {
-        // Remove from previous slot if already assigned
         for (int i = 0; i < 9; i++) {
             if (hotbarAbilities[i] == ability) {
                 hotbarAbilities[i] = null;
             }
         }
-        // If clicking the same slot, unassign instead
         if (hotbarAbilities[slot] == ability) {
             hotbarAbilities[slot] = null;
             ability.setHotbarSlot(-1);
@@ -680,19 +544,15 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
         }
     }
 
-    /**
-     * Opens the video preview popup for the given ability.
-     */
     private void openVideoPreview(Ability ability) {
         Minecraft mc = Minecraft.getInstance();
-        mc.pushGuiLayer(new VideoPopupScreen(this, ability));
+        mc.pushGuiLayer(new VideoPopupScreen(this, ability)); // Make sure this class exists
     }
 
     // ============================================================
     // UTILITY METHODS
     // ============================================================
 
-    /** Filters abilities by their type. */
     private List<Ability> getAbilitiesByType(AbilityType type) {
         List<Ability> result = new ArrayList<>();
         for (Ability a : allAbilities) {
@@ -703,15 +563,9 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
         return result;
     }
 
-    /**
-     * Checks if a requirement string is met by the player.
-     * This is a placeholder — implement your actual requirement checking here.
-     */
     private boolean isRequirementMet(String requirement) {
-        // Placeholder logic — replace with actual checks against player data
         if (requirement.contains("None")) return true;
         if (requirement.contains("Mastery Level")) {
-            // Extract number from "Mastery Level XX"
             try {
                 int required = Integer.parseInt(requirement.replaceAll("\\D+", ""));
                 return com.anastas1s12.jjs.client.ClientCEData.getMasteryLevel() >= required;
@@ -719,13 +573,9 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
                 return false;
             }
         }
-        // Default: unknown requirement = not met
         return false;
     }
 
-    /**
-     * Word-wraps text to fit within a given pixel width.
-     */
     private List<String> wrapText(String text, int maxWidth) {
         List<String> lines = new ArrayList<>();
         StringBuilder currentLine = new StringBuilder();
@@ -746,7 +596,7 @@ public class AbilitiesTabScreen extends BaseMenuScreen {
     }
 
     // ============================================================
-    // INNER CLASSES — Clickable Areas
+    // INNER CLASSES
     // ============================================================
 
     private static class AbilityClickArea {
