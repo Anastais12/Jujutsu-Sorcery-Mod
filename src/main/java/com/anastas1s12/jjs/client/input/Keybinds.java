@@ -28,17 +28,12 @@ import org.lwjgl.glfw.GLFW;
  */
 public class Keybinds {
 
-    /** Category name shown in Minecraft's Controls menu */
     public static final String CATEGORY = "key.categories." + JujutsuSorcery.MOD_ID;
 
-    // ============================================================
-    // KEY MAPPINGS
-    // ============================================================
+    private static boolean isWorkbenchOpen = false;
+    private static boolean isDebugOverlayOpen = false;
 
-    /**
-     * Opens the main Jujutsu Sorcery menu.
-     * Default: J key
-     */
+
     public static final KeyMapping OPEN_MENU = new KeyMapping(
             "key." + JujutsuSorcery.MOD_ID + ".open_menu",     // Translation key
             KeyConflictContext.IN_GAME,                         // Only works in-game
@@ -47,10 +42,6 @@ public class Keybinds {
             CATEGORY                                            // Category in controls menu
     );
 
-    /**
-     * Toggles Sorcerer Mode (shows/hides the ability hotbar).
-     * Default: R key
-     */
     public static final KeyMapping TOGGLE_SORCERER_MODE = new KeyMapping(
             "key." + JujutsuSorcery.MOD_ID + ".toggle_sorcerer_mode",
             KeyConflictContext.IN_GAME,
@@ -59,46 +50,19 @@ public class Keybinds {
             CATEGORY
     );
 
-    /**
-     * Uses the currently selected hotbar ability.
-     * Default: Middle mouse button
-     */
-    public static final KeyMapping USE_ABILITY = new KeyMapping(
-            "key." + JujutsuSorcery.MOD_ID + ".use_ability",
+    public static final KeyMapping OPEN_WORKBENCH = new KeyMapping(
+            "key." + JujutsuSorcery.MOD_ID + ".open_workbench",
             KeyConflictContext.IN_GAME,
-            InputConstants.Type.MOUSE,
-            GLFW.GLFW_MOUSE_BUTTON_MIDDLE, // Middle click
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_F8,
             CATEGORY
     );
 
-    // ============================================================
-    // REGISTRATION
-    // ============================================================
-
-    /**
-     * Register all keybinds. Call this during FMLClientSetupEvent.
-     *
-     * Example in your main mod class:
-     *   modEventBus.addListener(this::clientSetup);
-     *
-     *   private void clientSetup(FMLClientSetupEvent event) {
-     *       event.enqueueWork(() -> {
-     *           Keybinds.register();
-     *       });
-     *   }
-     */
-    public static void register() {
-        // KeyMappings are auto-registered when created with the @SubscribeEvent
-        // approach, or you can register them manually to the ClientRegistry.
-        // In 1.20.1, KeyMapping instances need to be registered via event:
-        //
-        // @SubscribeEvent
-        // public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        //     event.register(Keybinds.OPEN_MENU);
-        //     event.register(Keybinds.TOGGLE_RCT);
-        //     event.register(Keybinds.USE_ABILITY);
-        // }
-        //
-        // See ClientInputHandler for the event handler.
-    }
+    public static final KeyMapping TOGGLE_DEBUG_OVERLAY = new KeyMapping(
+            "key." + JujutsuSorcery.MOD_ID + ".toggle_debug_overlay",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_F9,
+            CATEGORY
+    );
 }

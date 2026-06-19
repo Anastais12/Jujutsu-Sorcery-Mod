@@ -2,8 +2,9 @@ package com.anastas1s12.jjs.event;
 
 import com.anastas1s12.jjs.JujutsuSorcery;
 import com.anastas1s12.jjs.command.CECommand;
-import com.anastas1s12.jjs.command.DebugCommand;
+import com.anastas1s12.jjs.command.ImpactCommands;
 import com.anastas1s12.jjs.command.JJSCommand;
+import com.anastas1s12.jjs.command.ShaderCommands;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -18,6 +19,7 @@ public class ServerEventHandler {
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CECommand.register(event.getDispatcher());
         JJSCommand.register(event.getDispatcher());
-        DebugCommand.register(event.getDispatcher());
+        ImpactCommands.register(event.getDispatcher());
+        ShaderCommands.register(event.getDispatcher());
     }
 }

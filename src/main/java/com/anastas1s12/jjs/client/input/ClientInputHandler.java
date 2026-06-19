@@ -6,6 +6,8 @@ import com.anastas1s12.jjs.client.ClientSorcererState;
 import com.anastas1s12.jjs.client.screen.menu.AbilitiesTabScreen;
 import com.anastas1s12.jjs.networking.ModNetworking;
 import com.anastas1s12.jjs.networking.c2s.ToggleSorcererModeC2SPacket;
+import com.anastas1s12.jjs.system.shader.gui.ShaderWorkbenchScreen;
+import com.anastas1s12.jjs.system.shader.gui.debug.DebugOverlayScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -48,6 +50,16 @@ public class ClientInputHandler {
             toggleSorcererMode();
             return;
         }
+
+        if (Keybinds.OPEN_WORKBENCH.consumeClick()) {
+            mc.setScreen(new ShaderWorkbenchScreen());
+            return;
+        }
+
+    if (Keybinds.TOGGLE_DEBUG_OVERLAY.consumeClick()) {
+            mc.setScreen(new DebugOverlayScreen());
+            return;
+        }
     }
 
     // ── Mouse button input ────────────────────────────────────────────────────
@@ -58,10 +70,6 @@ public class ClientInputHandler {
         if (mc.player == null) return;
         if (mc.screen != null) return;
 
-        // ---- USE ABILITY (middle mouse) ----------------------------------
-        if (Keybinds.USE_ABILITY.consumeClick()) {
-            useSelectedAbility();
-        }
     }
 
     // ── Mouse scroll ─────────────────────────────────────────────────────────
@@ -138,7 +146,6 @@ public class ClientInputHandler {
         public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
             event.register(Keybinds.OPEN_MENU);
             event.register(Keybinds.TOGGLE_SORCERER_MODE);
-            event.register(Keybinds.USE_ABILITY);
             JujutsuSorcery.LOGGER.info("JJS keybinds registered.");
         }
     }

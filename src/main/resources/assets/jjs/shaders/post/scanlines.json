@@ -1,0 +1,18 @@
+{
+    "blend": {
+        "func": "add",
+        "srcrgb": "one",
+        "dstrgb": "zero"
+    },
+    "vertex": "shaderworkbench:post/blur",
+    "fragment": "shaderworkbench:post/scanlines",
+    "attributes": ["Position"],
+    "samplers": [
+        { "name": "DiffuseSampler" }
+    ],
+    "uniforms": [
+        { "name": "InSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
+        { "name": "Intensity", "type": "float", "count": 1, "values": [ 0.3 ] },
+        { "name": "LineCount", "type": "float", "count": 1, "values": [ 480.0 ] }
+    ]
+}

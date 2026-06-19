@@ -1,0 +1,19 @@
+{
+    "blend": {
+        "func": "add",
+        "srcrgb": "one",
+        "dstrgb": "zero"
+    },
+    "vertex": "shaderworkbench:post/blur",
+    "fragment": "shaderworkbench:post/colorgrade",
+    "attributes": ["Position"],
+    "samplers": [
+        { "name": "DiffuseSampler" }
+    ],
+    "uniforms": [
+        { "name": "InSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
+        { "name": "Contrast", "type": "float", "count": 1, "values": [ 1.1 ] },
+        { "name": "Saturation", "type": "float", "count": 1, "values": [ 1.2 ] },
+        { "name": "Brightness", "type": "float", "count": 1, "values": [ 0.05 ] }
+    ]
+}

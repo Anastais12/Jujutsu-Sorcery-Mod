@@ -1,0 +1,19 @@
+{
+    "blend": {
+        "func": "add",
+        "srcrgb": "one",
+        "dstrgb": "zero"
+    },
+    "vertex": "shaderworkbench:post/blur",
+    "fragment": "shaderworkbench:post/fxaa",
+    "attributes": ["Position"],
+    "samplers": [
+        { "name": "DiffuseSampler" }
+    ],
+    "uniforms": [
+        { "name": "InSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
+        { "name": "SpanMax", "type": "float", "count": 1, "values": [ 8.0 ] },
+        { "name": "ReduceMul", "type": "float", "count": 1, "values": [ 0.125 ] },
+        { "name": "ReduceMin", "type": "float", "count": 1, "values": [ 0.0078125 ] }
+    ]
+}
